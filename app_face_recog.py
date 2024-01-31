@@ -4,6 +4,19 @@ from PIL import Image
 import os
 import csv
 from datetime import datetime
+import time
+
+def check_password():
+    expected_password = "sakum"  # Замените на ваш реальный пароль
+    entered_password = input("Введите пароль: ")
+
+    if entered_password == expected_password:
+        print("Пароль верный. Запуск программы.")
+        return True
+    else:
+        print("Неверный пароль. Программа завершена.")
+        return False
+
 
 def capture_faces():
     cascade_path = 'haarcascade_frontalface_default.xml'
@@ -90,8 +103,8 @@ def train_recognizer(path='dataset'):
     print("\n [INFO] {0} faces trained. Закрытие".format(len(np.unique(ids))))
 
 
-def log_face_capture(face_id):
-    log_file = 'face_log.csv'
+def log_face_capture(face_id, guest=False):
+    log_file = 'face_log.csv' if not guest else "guest_log.csv"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Проверяем, был ли пользователь уже записан в файл
@@ -202,5 +215,15 @@ def main():
         else:
             print("Неверный выбор. Пожалуйста, введите допустимую опцию.")
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    if check_password():
+        start_time = time.time()
+
+        while True:
+            elapsed_time = time.time() - start_time
+
+            if elapsed_time >= 60: # Проверка каждую минуту
+                log_face_capture('None', guest=True) # Запись неидентифицированного пользователя в guest.csv
+                start_time = time.time()
+
+            main()
